@@ -20,7 +20,7 @@ public class WebController {
         logger.info("Log level: INFO");
     }
 
-    @PostMapping(value = "/user_tag", consumes = "application/json")
+    @PostMapping(value = "/user_tags", consumes = "application/json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void saveUserTag(@RequestBody UserTag user_tag) {
         logger.info(user_tag.getCookie());
