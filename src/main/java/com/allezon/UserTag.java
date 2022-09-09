@@ -30,16 +30,6 @@ public class UserTag {
     private String product_id, brand_id, category_id;
     private Integer price;
 
-//    public UserTag(String time, String cookie, String country, String device, String action, String origin)
-//    public UserTag(String cookie) {
-////        this.time = time;
-//        this.cookie = cookie;
-////        this.country = country;
-////        this.device = device;
-////        this.action = action;
-////        this. origin = origin;
-//    }
-
     @JsonProperty("product_info")
     public void setProductInfo(Map<String, Object> product_info) {
         if (product_info.get("product_id") instanceof String) {
@@ -57,5 +47,13 @@ public class UserTag {
     }
     public String getCookie() {
         return this.cookie;
+    }
+
+    public String getAction() {
+        return this.action;
+    }
+
+    public String getTime() {
+        return this.time;
     }
 }
