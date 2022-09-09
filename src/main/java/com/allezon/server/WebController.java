@@ -1,6 +1,5 @@
-package com.allezon;
+package com.allezon.server;
 
-import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,7 @@ public class WebController {
 
     @PostMapping(value = "/user_tags", consumes = "application/json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void userTags(@RequestBody UserTag user_tag) {
+    public void userTags(@RequestBody UserTag user_tag) throws InterruptedException {
         if (!this.user_tags.containsKey(user_tag.getCookie())) {
             this.user_tags.put(user_tag.getCookie(), new ArrayList<>(List.of(user_tag)));
         } else {

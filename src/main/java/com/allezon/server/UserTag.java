@@ -1,4 +1,4 @@
-package com.allezon;
+package com.allezon.server;
 
 //<user_tag>
 //

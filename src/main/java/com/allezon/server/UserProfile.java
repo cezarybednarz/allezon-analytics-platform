@@ -1,11 +1,11 @@
-package com.allezon;
+package com.allezon.server;
 
 import java.util.List;
 
 public class UserProfile {
-    private String cookie;
-    private List<UserTag> views;
-    private List<UserTag> buys;
+    private final String cookie;
+    private final List<UserTag> views;
+    private final List<UserTag> buys;
 
     public UserProfile(String cookie, List<UserTag> views, List<UserTag> buys) {
         this.cookie = cookie;
