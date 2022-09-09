@@ -1,5 +1,6 @@
 package com.allezon;
 
+import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -52,37 +53,36 @@ public class WebController {
                         .filter(user_tag -> inRange(user_tag.getTime(), time_range))
                         .collect(Collectors.toList());
 
+        List<UserTag> views =
+                user_tags_in_range.stream()
+                        .filter(user_tag -> user_tag.getAction().equals("VIEW"))
+                        .skip(max(cookie_user_tags.size() - limit_int, 0))
+                        .collect(Collectors.toList());
+
         List<UserTag> buys = user_tags_in_range.stream()
                 .filter(user_tag -> user_tag.getAction().equals("BUY"))
                 .skip(max(cookie_user_tags.size() - limit_int, 0))
                 .collect(Collectors.toList());
 
-        List<UserTag> views = user_tags_in_range.stream()
-                .filter(user_tag -> user_tag.getAction().equals("VIEW"))
-                .skip(max(cookie_user_tags.size() - limit_int, 0))
-                .collect(Collectors.toList());
+        Collections.reverse(views);
+        Collections.reverse(buys);
 
+        UserProfile result = new UserProfile(cookie, views, buys);
 
-        UserProfile result = new UserProfile(cookie, buys, views);
-        if(!result.getCookie().equals(debug.getCookie())) {
-            logger.error("wrong cookie!");
-            logger.error(result.getCookie());
-            logger.error(debug.getCookie());
-        }
-
-        if(result.getBuys().size() != debug.getBuys().size()) {
-            logger.error("wrong buys size!");
-            logger.error(String.valueOf(result.getBuys()));
-            logger.error(String.valueOf(debug.getBuys()));
-        }
-
-        if(result.getViews().size() != debug.getViews().size()) {
-            logger.error("wrong views size!");
+        if(!result.getViews().toString().equals(debug.getViews().toString())) {
+            logger.error(time_range);
+            logger.error("wrong views!");
             logger.error(String.valueOf(result.getViews()));
             logger.error(String.valueOf(debug.getViews()));
         }
 
-        return new UserProfile(cookie, buys, views);
+        if(!result.getBuys().toString().equals(debug.getBuys().toString())) {
+            logger.error("wrong buys!");
+            logger.error(String.valueOf(result.getBuys()));
+            logger.error(String.valueOf(debug.getBuys()));
+        }
+
+        return result;
     }
 
     private boolean inRange(String time, String time_range)  {

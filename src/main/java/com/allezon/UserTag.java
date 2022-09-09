@@ -22,6 +22,7 @@ package com.allezon;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.kafka.common.protocol.types.Field;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class UserTag {
@@ -42,6 +43,16 @@ public class UserTag {
         this.price = (Integer)product_info.get("price");
     }
 
+    @JsonProperty("product_info")
+    public Map<String, Object> getProductInfo() {
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("product_id", this.product_id);
+        ret.put("brand_id", this.brand_id);
+        ret.put("category_id", this.category_id);
+        ret.put("price", this.price);
+        return ret;
+    }
+
     public void setCookie(String cookie) {
         this.cookie = cookie;
     }
@@ -53,7 +64,24 @@ public class UserTag {
         return this.action;
     }
 
+    public String getCountry() {
+        return this.country;
+    }
+
+    public String getDevice() {
+        return this.device;
+    }
+
+    public String getOrigin() {
+        return this.origin;
+    }
+
     public String getTime() {
         return this.time;
+    }
+
+    @Override
+    public String toString() {
+        return "cookie: " + this.cookie + " time: " + this.time;
     }
 }

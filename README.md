@@ -27,5 +27,5 @@ curl -X POST http://localhost:8080/user_profiles/cookie123?time_range=11_22?limi
  - https://mimuw.rtbhouse.com/OpenVPN.pdf
  - https://spring.io/guides/gs/spring-boot/
  - 780e27788aa95a1f2dbcbcba04834a00
- - `sudo tcpdump -ni any port 8080 -vv -s0`
+ - sudo tcpdump -ni any port 8080 -vv -s0
 
