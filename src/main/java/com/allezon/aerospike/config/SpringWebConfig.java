@@ -10,7 +10,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.rtbhouse.nosqllab.avro2json.AvroJsonHttpMessageConverter;
+import com.allezon.aerospike.avro2json.AvroJsonHttpMessageConverter;
 
 @Configuration
 public class SpringWebConfig implements WebMvcConfigurer {

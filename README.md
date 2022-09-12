@@ -28,4 +28,6 @@ curl -X POST http://localhost:8080/user_profiles/cookie123?time_range=11_22?limi
  - https://spring.io/guides/gs/spring-boot/
  - 780e27788aa95a1f2dbcbcba04834a00
  - sudo tcpdump -ni any port 8080 -vv -s0
+ - https://mimjenkins.rtb-lab.pl/login?from=%2F
+ - wget -O aerospike.tgz https://artifacts.aerospike.com/aerospike-server-community/5.7.0.16/aerospike-server-community-5.7.0.16-ubuntu20.04.tgz
 

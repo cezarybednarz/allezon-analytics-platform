@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.rtbhouse.nosqllab.avro2json.AnyJson;
+import com.allezon.aerospike.avro2json.AnyJson;
 
 public class AnyJsonDeserializer extends JsonDeserializer<AnyJson> {
     @Override

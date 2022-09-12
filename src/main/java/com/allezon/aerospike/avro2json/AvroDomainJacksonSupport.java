@@ -15,14 +15,14 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.rtbhouse.nosqllab.avro2json.serde.AnyJsonDeserializer;
-import com.rtbhouse.nosqllab.avro2json.serde.AnyJsonSerializer;
-import com.rtbhouse.nosqllab.avro2json.serde.ArrayNodeSerializer;
-import com.rtbhouse.nosqllab.avro2json.serde.InstantDeserializer;
-import com.rtbhouse.nosqllab.avro2json.serde.InstantSerializer;
-import com.rtbhouse.nosqllab.avro2json.serde.LocalDateDeserializer;
-import com.rtbhouse.nosqllab.avro2json.serde.LocalDateSerializer;
-import com.rtbhouse.nosqllab.avro2json.serde.ObjectNodeSerializer;
+import com.allezon.aerospike.avro2json.serde.AnyJsonDeserializer;
+import com.allezon.aerospike.avro2json.serde.AnyJsonSerializer;
+import com.allezon.aerospike.avro2json.serde.ArrayNodeSerializer;
+import com.allezon.aerospike.avro2json.serde.InstantDeserializer;
+import com.allezon.aerospike.avro2json.serde.InstantSerializer;
+import com.allezon.aerospike.avro2json.serde.LocalDateDeserializer;
+import com.allezon.aerospike.avro2json.serde.LocalDateSerializer;
+import com.allezon.aerospike.avro2json.serde.ObjectNodeSerializer;
 
 public final class AvroDomainJacksonSupport {
 

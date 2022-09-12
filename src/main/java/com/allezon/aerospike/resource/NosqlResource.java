@@ -1,6 +1,6 @@
 package com.allezon.aerospike.resource;
 
-import static com.rtbhouse.nosqllab.avro2json.AvroJsonHttpMessageConverter.AVRO_JSON;
+import static com.allezon.aerospike.avro2json.AvroJsonHttpMessageConverter.AVRO_JSON;
 
 import java.util.Optional;
 
@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rtbhouse.nosqllab.Message;
-import com.rtbhouse.nosqllab.dao.MessageDao;
+import com.allezon.aerospike.Message;
+import com.allezon.aerospike.dao.MessageDao;
 
 @RestController
 @RequestMapping("/endpoint")

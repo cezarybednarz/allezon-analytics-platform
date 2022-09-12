@@ -1,4 +1,4 @@
-package com.allezon.server;
+package com.allezon;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

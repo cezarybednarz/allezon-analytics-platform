@@ -29,9 +29,9 @@ import com.aerospike.client.policy.WritePolicy;
 import com.aerospike.client.query.ResultSet;
 import com.aerospike.client.query.Statement;
 import com.aerospike.client.task.RegisterTask;
-import com.rtbhouse.nosqllab.Message;
-import com.rtbhouse.nosqllab.avro.SerDe;
-import com.rtbhouse.nosqllab.schema.SchemaVersion;
+import com.allezon.aerospike.Message;
+import com.allezon.aerospike.avro.SerDe;
+import com.allezon.aerospike.schema.SchemaVersion;
 
 @Component
 public class MessageDao {
