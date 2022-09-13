@@ -6,7 +6,7 @@
 curl -X POST http://localhost:8080/user_tags -H 'Content-Type: application/json' -d '
 {
     "time": "2022-03-22T12:15:00.000Z",
-    "cookie": "cookie12",
+    "cookie": "cookie123",
     "country": "Poland",
     "device": "PC",
     "action": "VIEW",

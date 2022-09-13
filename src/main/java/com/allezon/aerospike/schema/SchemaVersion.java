@@ -1,5 +1,6 @@
 package com.allezon.aerospike.schema;
 
+import com.allezon.aerospike.UserProfile;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.schema.registry.SchemaReference;
@@ -24,6 +25,9 @@ public class SchemaVersion implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         SchemaRegistrationResponse register = schemaRegistryClient.register("Message", "avro", Message.getClassSchema().toString());
+//        SchemaRegistrationResponse register = schemaRegistryClient.register("UserProfile", "avro", UserProfile.getClassSchema().toString());
+//        SchemaRegistrationResponse register = schemaRegistryClient.register("UserProfile", "avro", UserProfile.getClassSchema().toString());
+        // todo dodac UserProfile
         this.currentSchemaReference = register.getSchemaReference();
     }
 

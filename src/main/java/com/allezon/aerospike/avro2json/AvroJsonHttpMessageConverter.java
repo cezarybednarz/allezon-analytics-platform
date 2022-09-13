@@ -15,7 +15,7 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 public class AvroJsonHttpMessageConverter<T extends SpecificRecordBase> extends AbstractHttpMessageConverter<T> {
 
     private static final String APPLICATION = "application";
-    private static final String AVRO_JSON_SUBTYPE = "avro-json";
+    private static final String AVRO_JSON_SUBTYPE = "json";
 
     static final MediaType AVRO_JSON_MEDIA_TYPE = new MediaType(APPLICATION, AVRO_JSON_SUBTYPE, DEFAULT_CHARSET);
 
