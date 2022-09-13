@@ -22,7 +22,7 @@ curl -X POST http://localhost:8080/user_tags -H 'Content-Type: application/json'
 curl -X POST http://localhost:8080/user_profiles/cookie123?time_range=11_22?limit=199 -H 'Content-Type: application/json' 
 
 ```
-## Notes
+### Notes
  - https://mimuw.rtbhouse.com/labs/1.pdf
  - https://mimuw.rtbhouse.com/OpenVPN.pdf
  - https://spring.io/guides/gs/spring-boot/
@@ -30,4 +30,5 @@ curl -X POST http://localhost:8080/user_profiles/cookie123?time_range=11_22?limi
  - sudo tcpdump -ni any port 8080 -vv -s0
  - https://mimjenkins.rtb-lab.pl/login?from=%2F
  - wget -O aerospike.tgz https://artifacts.aerospike.com/aerospike-server-community/5.7.0.16/aerospike-server-community-5.7.0.16-ubuntu20.04.tgz
+ - asinfo -v 'truncate-namespace:namespace=mimuw;'
 

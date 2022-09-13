@@ -24,10 +24,9 @@ public class SchemaVersion implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        SchemaRegistrationResponse register = schemaRegistryClient.register("Message", "avro", Message.getClassSchema().toString());
-//        SchemaRegistrationResponse register = schemaRegistryClient.register("UserProfile", "avro", UserProfile.getClassSchema().toString());
-//        SchemaRegistrationResponse register = schemaRegistryClient.register("UserProfile", "avro", UserProfile.getClassSchema().toString());
-        // todo dodac UserProfile
+//        SchemaRegistrationResponse register = schemaRegistryClient.register("Message", "avro", Message.getClassSchema().toString());
+        SchemaRegistrationResponse register = schemaRegistryClient.register("UserProfile", "avro", UserProfile.getClassSchema().toString());
+        // todo sprawdzic czy ma sens (czy nie dodac innych pól)
         this.currentSchemaReference = register.getSchemaReference();
     }
 
