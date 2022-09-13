@@ -40,10 +40,6 @@ public class WebController {
     @PostMapping(value = "/user_tags", consumes = "application/json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void userTags(@RequestBody UserTag userTag) {
-        if (userTag.getCookie().toString().equals("Om9a1dPLrwLrTrXPCH3c")) {
-            logger.info("time for cookie Om9a1dPLrwLrTrXPCH3c: {}", userTag.getTime().toString());
-            logger.info("{}", userTag.getTime().toString().length());
-        }
         userProfileDao.put(userTag);
     }
 
@@ -52,7 +48,7 @@ public class WebController {
     public UserProfile userProfiles(@PathVariable String cookie,
                                     @RequestParam("time_range") String time_range,
                                     @RequestParam(name = "limit", defaultValue = "200", required = false) String limit,
-                                    @RequestBody UserProfile debug) {
+                                    @RequestBody(required = false) UserProfile debug) {
         int limit_int = Integer.parseInt(limit);
 
         UserProfile dbUserProfile = userProfileDao.get(cookie);
@@ -78,9 +74,9 @@ public class WebController {
 
         UserProfile result = new UserProfile(cookie, filteredViews, filteredBuys);
 
-        if(!debug.toString().equals(result.toString())) {
-            logger.error("different value than debug! {} {}", debug, result);
-        }
+//        if(!debug.toString().equals(result.toString())) {
+//            logger.error("different value than debug! {} {}", debug, result);
+//        }
         return result;
     }
 

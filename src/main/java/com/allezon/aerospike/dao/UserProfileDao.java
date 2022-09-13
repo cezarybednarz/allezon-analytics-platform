@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.schema.registry.client.SchemaRegistryClient;
 import org.springframework.stereotype.Component;
+import org.xerial.snappy.Snappy;
 
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -68,7 +70,6 @@ public class UserProfileDao {
                         ? formatterShort.parse(time)
                         : formatter.parse(time);
             } catch (ParseException e) {
-                logger.error("sortAndTruncate() cookie: {}  time: {}", ut.getCookie().toString(), ut.getTime().toString());
                 throw new RuntimeException(e);
             }
         }));
@@ -107,7 +108,7 @@ public class UserProfileDao {
                 UserProfile updatedUserProfile = updateUserProfile(userProfile, userTag);
                 Key key = new Key(NAMESPACE, SET, cookie);
                 Bin versionBin = new Bin(VERSION_BIN, schemaVersion.getCurrentSchemaVersion());
-                Bin userProfileBin = new Bin(USER_PROFILE_BIN, serde.serialize(updatedUserProfile));
+                Bin userProfileBin = new Bin(USER_PROFILE_BIN, Snappy.compress(serde.serialize(updatedUserProfile)));
 
                 WritePolicy writePolicy = new WritePolicy(client.writePolicyDefault);
                 writePolicy.generation = record == null ? 0 : record.generation;
@@ -123,6 +124,8 @@ public class UserProfileDao {
                     continue;
                 }
                 throw e;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -139,8 +142,12 @@ public class UserProfileDao {
 
         int writerSchemaId = record.getInt(VERSION_BIN);
         if (schemaVersion.getCurrentSchemaVersion() == writerSchemaId) {
-            return Pair.of(serde.deserialize((byte[]) record.getValue(USER_PROFILE_BIN), UserProfile.getClassSchema()),
-                    record);
+            try {
+                return Pair.of(serde.deserialize(Snappy.uncompress((byte[]) record.getValue(USER_PROFILE_BIN)), UserProfile.getClassSchema()),
+                        record);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         String schema = schemaRegistryClient.fetch(writerSchemaId);
@@ -148,8 +155,12 @@ public class UserProfileDao {
             throw new IllegalStateException("Schema with id: " + writerSchemaId + " does not exist");
         }
 
-        return Pair.of(serde.deserialize((byte[]) record.getValue(USER_PROFILE_BIN), new Schema.Parser().parse(schema)),
-                record);
+        try {
+            return Pair.of(serde.deserialize(Snappy.uncompress((byte[]) record.getValue(USER_PROFILE_BIN)), new Schema.Parser().parse(schema)),
+                    record);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public UserProfile get(String cookie) {
