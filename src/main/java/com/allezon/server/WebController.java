@@ -33,14 +33,18 @@ public class WebController {
 
     @Autowired
     private UserProfileDao userProfileDao;
-    Logger logger = LoggerFactory.getLogger(WebController.class);
+    private final Logger logger = LoggerFactory.getLogger(WebController.class);
 
     public WebController() { }
 
     @PostMapping(value = "/user_tags", consumes = "application/json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void userTags(@RequestBody UserTag user_tag) {
-        userProfileDao.put(user_tag);
+    public void userTags(@RequestBody UserTag userTag) {
+        if (userTag.getCookie().toString().equals("Om9a1dPLrwLrTrXPCH3c")) {
+            logger.info("time for cookie Om9a1dPLrwLrTrXPCH3c: {}", userTag.getTime().toString());
+            logger.info("{}", userTag.getTime().toString().length());
+        }
+        userProfileDao.put(userTag);
     }
 
     @PostMapping(produces = AVRO_JSON, value = "/user_profiles/{cookie}")
@@ -73,17 +77,7 @@ public class WebController {
         Collections.reverse(filteredBuys);
 
         UserProfile result = new UserProfile(cookie, filteredViews, filteredBuys);
-        if(!result.getViews().toString().equals(debug.getViews().toString())) {
-            logger.error(time_range);
-            logger.error("wrong views!");
-            logger.error(String.valueOf(result.getViews()));
-            logger.error(String.valueOf(debug.getViews()));
-        }
-        if(!result.getBuys().toString().equals(debug.getBuys().toString())) {
-            logger.error("wrong buys!");
-            logger.error(String.valueOf(result.getBuys()));
-            logger.error(String.valueOf(debug.getBuys()));
-        }
+
         if(!debug.toString().equals(result.toString())) {
             logger.error("different value than debug! {} {}", debug, result);
         }
@@ -92,13 +86,17 @@ public class WebController {
 
     private boolean inRange(String time, String time_range)  {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        SimpleDateFormat formatterShort = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         String[] date_range = time_range.split("_");
         try {
-            Date user_tag_date = formatter.parse(time.substring(0, time.length() - 1));
+            Date user_tag_date = time.length() == 20
+                    ? formatterShort.parse(time.substring(0, time.length() - 1))
+                    : formatter.parse(time.substring(0, time.length() - 1));
             Date begin_date = formatter.parse(date_range[0]);
             Date end_date = formatter.parse(date_range[1]);
             return user_tag_date.compareTo(begin_date) >= 0 && user_tag_date.compareTo(end_date) < 0;
         } catch (ParseException e) {
+            logger.error("inRange({}, {})", time, time_range);
             throw new RuntimeException(e);
         }
     }

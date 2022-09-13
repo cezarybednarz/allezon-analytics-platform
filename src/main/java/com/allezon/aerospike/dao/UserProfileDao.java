@@ -6,16 +6,20 @@ import com.allezon.aerospike.UserProfile;
 import com.allezon.aerospike.UserTag;
 import com.allezon.aerospike.avro.SerDe;
 import com.allezon.aerospike.schema.SchemaVersion;
+import com.allezon.server.WebController;
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.schema.registry.client.SchemaRegistryClient;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Component
 public class UserProfileDao {
@@ -24,8 +28,11 @@ public class UserProfileDao {
     private static final String USER_PROFILE_BIN = "userprofile";
     private static final String VERSION_BIN = "version";
 
-    private AerospikeClient client;
-    private SerDe<UserProfile> serde;
+    private static final int MAX_USER_TAGS = 200;
+    private final Logger logger = LoggerFactory.getLogger(WebController.class);
+
+    private final AerospikeClient client;
+    private final SerDe<UserProfile> serde;
 
     @Autowired
     private SchemaVersion schemaVersion;
@@ -36,8 +43,8 @@ public class UserProfileDao {
     private static ClientPolicy defaultClientPolicy() {
         ClientPolicy defaulClientPolicy = new ClientPolicy();
         defaulClientPolicy.readPolicyDefault.replica = Replica.MASTER_PROLES;
-        defaulClientPolicy.readPolicyDefault.socketTimeout = 100;
-        defaulClientPolicy.readPolicyDefault.totalTimeout = 100;
+        defaulClientPolicy.readPolicyDefault.socketTimeout = 200;
+        defaulClientPolicy.readPolicyDefault.totalTimeout = 200;
         defaulClientPolicy.writePolicyDefault.socketTimeout = 15000;
         defaulClientPolicy.writePolicyDefault.totalTimeout = 15000;
         defaulClientPolicy.writePolicyDefault.maxRetries = 3;
@@ -51,17 +58,38 @@ public class UserProfileDao {
         this.serde = new SerDe<>(UserProfile.getClassSchema());
     }
 
+    private void sortAndTruncate(List<UserTag> userTags) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        SimpleDateFormat formatterShort = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        userTags.sort(Comparator.comparing(ut -> {
+            String time = ut.getTime().toString();
+            try {
+                return time.length() == 20
+                        ? formatterShort.parse(time)
+                        : formatter.parse(time);
+            } catch (ParseException e) {
+                logger.error("sortAndTruncate() cookie: {}  time: {}", ut.getCookie().toString(), ut.getTime().toString());
+                throw new RuntimeException(e);
+            }
+        }));
+        if(userTags.size() > MAX_USER_TAGS) {
+            userTags.remove(0);
+        }
+    }
     private UserProfile updateUserProfile(UserProfile userProfile, UserTag userTag) {
         if(userProfile == null) {
             userProfile = new UserProfile(userTag.getCookie().toString(), new ArrayList<>(), new ArrayList<>());
         }
+
         if(userTag.getAction().equals("VIEW")) {
             List<UserTag> views = userProfile.getViews();
             views.add(userTag);
+            sortAndTruncate(views);
             userProfile.setViews(views);
         } else {
             List<UserTag> buys = userProfile.getBuys();
             buys.add(userTag);
+            sortAndTruncate(buys);
             userProfile.setBuys(buys);
         }
         return userProfile;
@@ -70,30 +98,49 @@ public class UserProfileDao {
     public void put(UserTag userTag) {
         String cookie = userTag.getCookie().toString();
 
-        WritePolicy writePolicy = new WritePolicy(client.writePolicyDefault);
-        UserProfile userProfile = this.get(cookie);
+        for(int attempt = 0; attempt < 3; attempt++) {
+            try {
+                Pair<UserProfile, Record> userProfileWithGeneration = this.getWithRecord(cookie);
+                UserProfile userProfile = userProfileWithGeneration.getLeft();
+                Record record = userProfileWithGeneration.getRight();
 
-        UserProfile updatedUserProfile = updateUserProfile(userProfile, userTag);
-        Key key = new Key(NAMESPACE, SET, cookie);
-        Bin versionBin = new Bin(VERSION_BIN, schemaVersion.getCurrentSchemaVersion());
-        Bin userProfileBin = new Bin(USER_PROFILE_BIN, serde.serialize(updatedUserProfile));
+                UserProfile updatedUserProfile = updateUserProfile(userProfile, userTag);
+                Key key = new Key(NAMESPACE, SET, cookie);
+                Bin versionBin = new Bin(VERSION_BIN, schemaVersion.getCurrentSchemaVersion());
+                Bin userProfileBin = new Bin(USER_PROFILE_BIN, serde.serialize(updatedUserProfile));
 
-        client.put(writePolicy, key, versionBin, userProfileBin);
+                WritePolicy writePolicy = new WritePolicy(client.writePolicyDefault);
+                writePolicy.generation = record == null ? 0 : record.generation;
+                writePolicy.generationPolicy = GenerationPolicy.EXPECT_GEN_EQUAL;
+
+                client.put(writePolicy, key, versionBin, userProfileBin);
+                break;
+            } catch (AerospikeException e) {
+                // if the record version did not match, it means that it has been changed and we must retry the whole operation
+                if (e.getResultCode() == ResultCode.GENERATION_ERROR) {
+                    logger.warn("Generation error while trying to update the profile for cookie: {}, attempt: {} - retrying",
+                            userTag.getCookie(), attempt + 1);
+                    continue;
+                }
+                throw e;
+            }
+        }
     }
 
-    public UserProfile get(String cookie) {
+    private Pair<UserProfile, Record> getWithRecord(String cookie) {
         Policy readPolicy = new Policy(client.readPolicyDefault);
 
         Key key = new Key(NAMESPACE, SET, cookie);
         Record record = client.get(readPolicy, key, VERSION_BIN, USER_PROFILE_BIN);
 
         if (record == null) {
-            return null;
+            return Pair.of(null, null);
         }
 
         int writerSchemaId = record.getInt(VERSION_BIN);
         if (schemaVersion.getCurrentSchemaVersion() == writerSchemaId) {
-            return serde.deserialize((byte[]) record.getValue(USER_PROFILE_BIN), UserProfile.getClassSchema());
+            return Pair.of(serde.deserialize((byte[]) record.getValue(USER_PROFILE_BIN), UserProfile.getClassSchema()),
+                    record);
         }
 
         String schema = schemaRegistryClient.fetch(writerSchemaId);
@@ -101,7 +148,12 @@ public class UserProfileDao {
             throw new IllegalStateException("Schema with id: " + writerSchemaId + " does not exist");
         }
 
-        return serde.deserialize((byte[]) record.getValue(USER_PROFILE_BIN), new Schema.Parser().parse(schema));
+        return Pair.of(serde.deserialize((byte[]) record.getValue(USER_PROFILE_BIN), new Schema.Parser().parse(schema)),
+                record);
+    }
+
+    public UserProfile get(String cookie) {
+        return getWithRecord(cookie).getLeft();
     }
 
     @PreDestroy
