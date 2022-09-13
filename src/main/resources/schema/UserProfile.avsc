@@ -1,0 +1,41 @@
+
+{ "namespace": "com.allezon.aerospike",
+  "type": "record",
+  "name": "UserProfile",
+  "fields": [
+    {"name": "cookie", "type": "string"},
+    {"name": "views", "type": {
+      "type": "array",
+      "items": {
+        "type": "record",
+        "name": "UserTag",
+        "fields": [
+          {"name": "time", "type": "string"},
+          {"name": "cookie", "type": "string"},
+          {"name": "country", "type": "string"},
+          {"name": "device", "type": "string"},
+          {"name": "action", "type": "string"},
+          {"name": "origin", "type": "string"},
+          {"name": "product_info", "type": {
+            "type": "record",
+            "name": "ProductInfo",
+            "fields": [
+              {"name": "product_id", "type": "string"},
+              {"name": "brand_id", "type": "string"},
+              {"name": "category_id", "type": "string"},
+              {"name": "price", "type": "int"}
+            ]
+            }
+          }
+        ]
+      }
+    }},
+    {
+      "name": "buys",
+      "type": {
+        "type": "array",
+        "items": "UserTag"
+      }
+    }
+  ]
+}

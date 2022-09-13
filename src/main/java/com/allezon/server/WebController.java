@@ -1,8 +1,11 @@
 package com.allezon.server;
 
+import com.allezon.aerospike.UserProfile;
+import com.allezon.aerospike.UserTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -10,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.allezon.aerospike.avro2json.AvroJsonHttpMessageConverter.AVRO_JSON;
 import static java.lang.Integer.max;
 
 @RestController
@@ -25,19 +29,19 @@ public class WebController {
     @PostMapping(value = "/user_tags", consumes = "application/json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void userTags(@RequestBody UserTag user_tag) throws InterruptedException {
-        if (!this.user_tags.containsKey(user_tag.getCookie())) {
-            this.user_tags.put(user_tag.getCookie(), new ArrayList<>(List.of(user_tag)));
+        if (!this.user_tags.containsKey(user_tag.getCookie().toString())) {
+            this.user_tags.put(user_tag.getCookie().toString(), new ArrayList<>(List.of(user_tag)));
         } else {
-            this.user_tags.get(user_tag.getCookie()).add(user_tag);
+            this.user_tags.get(user_tag.getCookie().toString()).add(user_tag);
         }
     }
 
-    @PostMapping(value = "/user_profiles/{cookie}")
+    @PostMapping(value = "/user_profiles/{cookie}", produces = AVRO_JSON)
     @ResponseBody
-    public UserProfile userProfiles(@PathVariable String cookie,
-                                    @RequestParam("time_range") String time_range,
-                                    @RequestParam(name = "limit", defaultValue = "200", required = false) String limit,
-                                    @RequestBody UserProfile debug) {
+    public ResponseEntity<UserProfile> userProfiles(@PathVariable String cookie,
+                                                    @RequestParam("time_range") String time_range,
+                                                    @RequestParam(name = "limit", defaultValue = "200", required = false) String limit,
+                                                    @RequestBody UserProfile debug) {
 
         Integer limit_int = Integer.valueOf(limit);
 
@@ -49,17 +53,17 @@ public class WebController {
 
         List<UserTag> user_tags_in_range =
                 cookie_user_tags.stream()
-                        .filter(user_tag -> inRange(user_tag.getTime(), time_range))
+                        .filter(user_tag -> inRange(user_tag.getTime().toString(), time_range))
                         .collect(Collectors.toList());
 
         List<UserTag> views =
                 user_tags_in_range.stream()
-                        .filter(user_tag -> user_tag.getAction().equals("VIEW"))
+                        .filter(user_tag -> user_tag.getAction().toString().equals("VIEW"))
                         .skip(max(cookie_user_tags.size() - limit_int, 0))
                         .collect(Collectors.toList());
 
         List<UserTag> buys = user_tags_in_range.stream()
-                .filter(user_tag -> user_tag.getAction().equals("BUY"))
+                .filter(user_tag -> user_tag.getAction().toString().equals("BUY"))
                 .skip(max(cookie_user_tags.size() - limit_int, 0))
                 .collect(Collectors.toList());
 
