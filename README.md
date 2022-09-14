@@ -13,28 +13,6 @@ Solution to use case 1 and 2 from task description
 | stXXXvm104.rtb-lab.pl | *Aerospike node 3*              |
 | stXXXvm110.rtb-lab.pl | *Schema Registry instance*      |
 
-### Example requests
-```json
-
-curl -X POST http://localhost:8080/user_tags -H 'Content-Type: application/json' -d '
-{
-    "time": "2022-03-22T12:15:00.000Z",
-    "cookie": "cookie123",
-    "country": "Poland",
-    "device": "PC",
-    "action": "VIEW",
-    "origin": "MainPage",
-    "product_info": {
-        "product_id": "arimaxy",
-        "brand_id": "Nike",
-        "category_id": "shoes",
-        "price": 330  
-    }
-}'
-                
-curl -X POST http://localhost:8080/user_profiles/cookie123?time_range=11_22?limit=199 -H 'Content-Type: application/json' 
-
-```
 
 Task Description: Allezon Analytics Platform
 ==========================
