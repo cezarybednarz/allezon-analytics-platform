@@ -74,9 +74,9 @@ public class WebController {
 
         UserProfile result = new UserProfile(cookie, filteredViews, filteredBuys);
 
-//        if(!debug.toString().equals(result.toString())) {
-//            logger.error("different value than debug! {} {}", debug, result);
-//        }
+        if(!debug.toString().equals(result.toString())) {
+            logger.error("different value than debug! {} {}", debug, result);
+        }
         return result;
     }
 
@@ -92,7 +92,6 @@ public class WebController {
             Date end_date = formatter.parse(date_range[1]);
             return user_tag_date.compareTo(begin_date) >= 0 && user_tag_date.compareTo(end_date) < 0;
         } catch (ParseException e) {
-            logger.error("inRange({}, {})", time, time_range);
             throw new RuntimeException(e);
         }
     }

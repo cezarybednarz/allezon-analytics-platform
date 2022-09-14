@@ -8,8 +8,6 @@ import org.springframework.cloud.schema.registry.SchemaRegistrationResponse;
 import org.springframework.cloud.schema.registry.client.SchemaRegistryClient;
 import org.springframework.stereotype.Component;
 
-import com.allezon.aerospike.Message;
-
 @Component
 public class SchemaVersion implements InitializingBean {
 
