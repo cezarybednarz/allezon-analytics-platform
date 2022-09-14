@@ -8,7 +8,7 @@ Solution to use case 1 and 2 from task description
 | Address               | Purpose                         |
 |-----------------------|---------------------------------|
 | stXXXvm101.rtb-lab.pl | *Java Server* |
-| stXXXvm102.rtb-lab.pl | *Aerospike node 2*              |
+| stXXXvm102.rtb-lab.pl | *Aerospike node 1*              |
 | stXXXvm103.rtb-lab.pl | *Aerospike node 2*              |
 | stXXXvm104.rtb-lab.pl | *Aerospike node 3*              |
 | stXXXvm110.rtb-lab.pl | *Schema Registry instance*      |
